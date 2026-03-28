@@ -6,48 +6,73 @@
     <title>Buy v.s. Rent</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* 1. 基礎重置：防止所有元素撐破寬度 */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent; /* 優化 iPhone 點擊效果 */
+        }
+
         body {
             background-color: #111827;
             color: #E5E7EB;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             margin: 0;
-            padding: 0; /* 移除 body 預設內距 */
-            display: flex;
-            justify-content: center; /* 水平置中 */
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden; /* 徹底禁止橫向捲動 */
         }
+
+        /* 2. 容器置中：使用 margin: auto 的雙重保險 */
         .container {
             width: 100%;
             max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px; /* 在 container 內留白，防止貼邊 */
-            box-sizing: border-box; /* 確保 padding 不會撐破寬度 */
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px 16px; /* 左右各留 16px 呼吸空間 */
+            display: block; /* 確保它是塊級元素 */
         }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: #FFFFFF; margin-bottom: 5px; font-size: 24px; }
-        .grid-main { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 1024px) { .grid-main { grid-template-columns: 1fr 2fr; } }
+
+        /* 3. 標題與卡片 */
+        header { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            padding: 0 10px;
+        }
+        
+        h1 { color: #FFFFFF; font-size: 1.5rem; margin-bottom: 8px; }
+
+        .grid-main { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            gap: 20px; 
+        }
+
+        /* 4. 電腦版佈局 */
+        @media (min-width: 1024px) {
+            .grid-main { grid-template-columns: 1fr 2fr; }
+        }
+
+        /* 5. 組件樣式 */
         .card {
             background-color: #1F2937;
             padding: 24px;
             border-radius: 12px;
             border: 1px solid #374151;
-            margin-bottom: 20px;
+            width: 100%; /* 確保卡片填滿容器 */
         }
+        
         .card-blue { border-left: 4px solid #3B82F6; }
         .card-green { border-left: 4px solid #10B981; }
-        .form-group { margin-bottom: 15px; }
-        .form-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; color: #9CA3AF; }
+
+        /* 滑桿與表單優化 */
+        .form-group { margin-bottom: 18px; }
+        .form-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: #9CA3AF; }
         .badge { background-color: #374151; color: #3B82F6; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
-        .badge-green { color: #10B981; }
-        input[type=range] {
-            width: 100%; height: 6px; background: #4B5563; border-radius: 3px; outline: none; cursor: pointer; -webkit-appearance: none;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; width: 16px; height: 16px; background: #3B82F6; border-radius: 50%;
-        }
+        input[type=range] { width: 100%; height: 8px; background: #4B5563; border-radius: 4px; outline: none; -webkit-appearance: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #3B82F6; border-radius: 50%; border: 2px solid #E5E7EB; }
+        
         .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .big-number { font-size: 32px; font-weight: 900; margin: 10px 0; color: #FFFFFF; }
-        .footer-note { font-size: 12px; color: #6B7280; text-align: center; margin-top: 10px; }
+        .big-number { font-size: 2rem; font-weight: 900; color: #FFFFFF; margin: 8px 0; }
     </style>
 </head>
 <body>
