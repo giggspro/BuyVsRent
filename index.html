@@ -2,14 +2,14 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Buy v.s. Rent</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* 1. 基礎重置：防止所有元素撐破寬度 */
+        /* 基礎重置與置中邏輯 */
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 優化 iPhone 點擊效果 */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -19,60 +19,118 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            overflow-x: hidden; /* 徹底禁止橫向捲動 */
+            overflow-x: hidden; /* 防止 iPhone 橫向抖動 */
+            display: block;
         }
 
-        /* 2. 容器置中：使用 margin: auto 的雙重保險 */
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1100px;
             margin-left: auto;
             margin-right: auto;
-            padding: 20px 16px; /* 左右各留 16px 呼吸空間 */
-            display: block; /* 確保它是塊級元素 */
+            padding: 20px 16px;
         }
 
-        /* 3. 標題與卡片 */
-        header { 
-            text-align: center; 
-            margin-bottom: 30px; 
-            padding: 0 10px;
-        }
-        
-        h1 { color: #FFFFFF; font-size: 1.5rem; margin-bottom: 8px; }
-
-        .grid-main { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 20px; 
+        header {
+            text-align: center;
+            margin-bottom: 25px;
         }
 
-        /* 4. 電腦版佈局 */
+        h1 { color: #FFFFFF; font-size: 1.6rem; margin: 0 0 8px 0; }
+        .subtitle { color: #9CA3AF; font-size: 14px; }
+
+        /* 佈局網格 */
+        .grid-main {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
         @media (min-width: 1024px) {
             .grid-main { grid-template-columns: 1fr 2fr; }
         }
 
-        /* 5. 組件樣式 */
+        /* 卡片設計 */
         .card {
             background-color: #1F2937;
             padding: 24px;
             border-radius: 12px;
             border: 1px solid #374151;
-            width: 100%; /* 確保卡片填滿容器 */
+            width: 100%;
         }
-        
-        .card-blue { border-left: 4px solid #3B82F6; }
-        .card-green { border-left: 4px solid #10B981; }
+        .card-blue { border-left: 5px solid #3B82F6; }
+        .card-green { border-left: 5px solid #10B981; }
 
-        /* 滑桿與表單優化 */
-        .form-group { margin-bottom: 18px; }
-        .form-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: #9CA3AF; }
-        .badge { background-color: #374151; color: #3B82F6; font-weight: bold; padding: 2px 8px; border-radius: 4px; }
-        input[type=range] { width: 100%; height: 8px; background: #4B5563; border-radius: 4px; outline: none; -webkit-appearance: none; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #3B82F6; border-radius: 50%; border: 2px solid #E5E7EB; }
-        
-        .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .big-number { font-size: 2rem; font-weight: 900; color: #FFFFFF; margin: 8px 0; }
+        .big-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            margin: 10px 0;
+        }
+
+        /* 表單控制項：手機版全寬度優化 */
+        .sub-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* 手機版強制單欄，拉長拉桿 */
+            gap: 20px;
+        }
+
+        @media (min-width: 1024px) {
+            .sub-grid { grid-template-columns: 1fr 1fr; }
+            .border-split { border-right: 1px solid #374151; padding-right: 20px; }
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #9CA3AF;
+        }
+
+        .badge {
+            background-color: #111827;
+            color: #3B82F6;
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 6px;
+            border: 1px solid #374151;
+        }
+
+        /* 滑桿觸控優化 */
+        input[type=range] {
+            width: 100%;
+            height: 8px;
+            background: #4B5563;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px; /* 加大圓點方便觸控 */
+            height: 26px;
+            background: #3B82F6;
+            border-radius: 50%;
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .footer-note {
+            font-size: 12px;
+            color: #6B7280;
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        #chart-wrapper {
+            height: 350px;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -84,32 +142,35 @@
 
     <div class="grid-main">
         <div>
-            <div class="card card-blue">
-                <div style="font-size: 12px; font-weight: bold; color: #9CA3AF; letter-spacing: 1px;">購屋組最終資產 (30年後)</div>
+            <div class="card card-blue" style="margin-bottom: 15px;">
+                <div style="font-size: 12px; font-weight: bold; color: #9CA3AF; letter-spacing: 1px;">購屋組最終資產</div>
                 <div class="big-number" id="res-buy">-- 萬</div>
                 <div style="font-size: 14px; color: #9CA3AF;">月繳房貸: <span id="res-mPay" style="color: #FFF;">--</span> 元</div>
             </div>
 
             <div class="card card-green">
-                <div style="font-size: 12px; font-weight: bold; color: #9CA3AF; letter-spacing: 1px;">租屋組最終資產 (30年後)</div>
+                <div style="font-size: 12px; font-weight: bold; color: #9CA3AF; letter-spacing: 1px;">租屋組最終資產</div>
                 <div class="big-number" id="res-rent">-- 萬</div>
-                <div style="font-size: 14px; color: #9CA3AF;">含初始投入 <span id="res-init" style="color: #10B981;">--</span> 萬與每月存金複利</div>
+                <div style="font-size: 14px; color: #9CA3AF;">初始本金: <span id="res-init" style="color: #10B981;">--</span> 萬</div>
             </div>
-            
+
             <div class="footer-note">
-                * 租屋組初始投入 = (總價 × 頭期%) + 裝潢雜費
+                租屋組初始投入包含：(總價 × 頭期%) + 裝潢雜費。<br>
+                每月將「房貸與租金之差額」投入股市計算複利。
             </div>
         </div>
 
         <div>
-            <div class="card" style="height: 380px;">
-                <canvas id="mainChart"></canvas>
+            <div class="card" style="margin-bottom: 20px;">
+                <div id="chart-wrapper">
+                    <canvas id="mainChart"></canvas>
+                </div>
             </div>
 
             <div class="card">
                 <div class="sub-grid">
-                    <div style="border-right: 1px solid #374151; padding-right: 15px;">
-                        <div style="font-size: 14px; font-weight: bold; color: #9CA3AF; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 5px;">房屋與貸款</div>
+                    <div class="border-split">
+                        <div style="font-size: 13px; font-weight: bold; color: #6B7280; margin-bottom: 20px; text-transform: uppercase;">房屋與貸款設定</div>
                         
                         <div class="form-group">
                             <div class="form-header"><span>房屋總價</span><span class="badge"><span id="v-price">2500</span>萬</span></div>
@@ -117,19 +178,18 @@
                         </div>
 
                         <div class="form-group">
-                            <div class="form-header"><span>裝潢與雜費投入</span><span class="badge"><span id="v-initCost">200</span>萬</span></div>
+                            <div class="form-header"><span>裝潢與規費投入</span><span class="badge"><span id="v-initCost">200</span>萬</span></div>
                             <input type="range" id="initCost" min="0" max="1000" step="10" value="200" oninput="update()">
                         </div>
 
-                        <div class="sub-grid">
-                            <div class="form-group">
-                                <div class="form-header"><span>頭期款 %</span><span id="v-down">30</span></div>
-                                <input type="range" id="down" min="10" max="100" step="5" value="30" oninput="update()">
-                            </div>
-                            <div class="form-group">
-                                <div class="form-header"><span>貸款年限</span><span id="v-lYear">30</span></div>
-                                <input type="range" id="lYear" min="10" max="40" step="5" value="30" oninput="update()">
-                            </div>
+                        <div class="form-group">
+                            <div class="form-header"><span>頭期款比例</span><span class="badge"><span id="v-down">30</span>%</span></div>
+                            <input type="range" id="down" min="10" max="100" step="5" value="30" oninput="update()">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-header"><span>貸款年限</span><span class="badge"><span id="v-lYear">30</span>年</span></div>
+                            <input type="range" id="lYear" min="10" max="40" step="5" value="30" oninput="update()">
                         </div>
 
                         <div class="form-group">
@@ -139,27 +199,26 @@
                     </div>
 
                     <div>
-                        <div style="font-size: 14px; font-weight: bold; color: #9CA3AF; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 5px;">投資與租屋</div>
+                        <div style="font-size: 13px; font-weight: bold; color: #6B7280; margin-bottom: 20px; text-transform: uppercase;">投資與租屋預測</div>
                         
                         <div class="form-group">
-                            <div class="form-header"><span>房價年增率</span><span class="badge-green badge"><span id="v-hApp">3.0</span>%</span></div>
-                            <input type="range" id="hApp" min="0" max="15" step="0.1" value="6.0" oninput="update()">
+                            <div class="form-header"><span>房價平均年增率</span><span class="badge" style="color:#10B981;"><span id="v-hApp">3.0</span>%</span></div>
+                            <input type="range" id="hApp" min="0" max="15" step="0.1" value="3.0" oninput="update()">
                         </div>
 
                         <div class="form-group">
-                            <div class="form-header"><span>股市年化報酬</span><span class="badge-green badge"><span id="v-iRet">8.0</span>%</span></div>
+                            <div class="form-header"><span>股市年化報酬率</span><span class="badge" style="color:#10B981;"><span id="v-iRet">8.0</span>%</span></div>
                             <input type="range" id="iRet" min="0" max="20" step="0.1" value="8.0" oninput="update()">
                         </div>
 
-                        <div class="sub-grid">
-                            <div class="form-group">
-                                <div class="form-header"><span>起始月租(萬)</span><span id="v-rent">3.0</span></div>
-                                <input type="range" id="rent" min="1" max="15" step="0.1" value="3.0" oninput="update()">
-                            </div>
-                            <div class="form-group">
-                                <div class="form-header"><span>租金年增 %</span><span id="v-rInf">2.0</span></div>
-                                <input type="range" id="rInf" min="0" max="10" step="0.1" value="2.0" oninput="update()">
-                            </div>
+                        <div class="form-group">
+                            <div class="form-header"><span>起始月租金</span><span class="badge"><span id="v-rent">3.0</span>萬</span></div>
+                            <input type="range" id="rent" min="1" max="15" step="0.1" value="3.0" oninput="update()">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-header"><span>租金年通膨率</span><span class="badge"><span id="v-rInf">2.0</span>%</span></div>
+                            <input type="range" id="rInf" min="0" max="10" step="0.1" value="2.0" oninput="update()">
                         </div>
                     </div>
                 </div>
@@ -171,7 +230,7 @@
 <script>
     let myChart;
     Chart.defaults.color = '#9CA3AF';
-    Chart.defaults.borderColor = 'rgba(75, 85, 99, 0.3)';
+    Chart.defaults.borderColor = 'rgba(75, 85, 99, 0.2)';
 
     function pmvt(rate, nper, pv) {
         if (rate === 0) return pv / nper;
@@ -179,17 +238,20 @@
     }
 
     function update() {
+        // 讀取參數
         const p = parseFloat(document.getElementById('price').value);
+        const ic = parseFloat(document.getElementById('initCost').value);
         const d = parseFloat(document.getElementById('down').value) / 100;
-        const lr = parseFloat(document.getElementById('lRate').value) / 100 / 12;
         const ly = parseInt(document.getElementById('lYear').value);
+        const lr = parseFloat(document.getElementById('lRate').value) / 100 / 12;
         const ha = parseFloat(document.getElementById('hApp').value) / 100;
         const ir = parseFloat(document.getElementById('iRet').value) / 100 / 12;
         const r = parseFloat(document.getElementById('rent').value) * 10000;
         const ri = parseFloat(document.getElementById('rInf').value) / 100;
-        const ic = parseFloat(document.getElementById('initCost').value);
 
+        // 更新 UI
         document.getElementById('v-price').innerText = p;
+        document.getElementById('v-initCost').innerText = ic;
         document.getElementById('v-down').innerText = d * 100;
         document.getElementById('v-lYear').innerText = ly;
         document.getElementById('v-lRate').innerText = (lr * 12 * 100).toFixed(2);
@@ -197,12 +259,12 @@
         document.getElementById('v-iRet').innerText = (ir * 12 * 100).toFixed(1);
         document.getElementById('v-rent').innerText = (r / 10000).toFixed(1);
         document.getElementById('v-rInf').innerText = (ri * 100).toFixed(1);
-        document.getElementById('v-initCost').innerText = ic;
 
+        // 計算邏輯
         const loanAmt = p * (1 - d);
         const mPay = pmvt(lr, ly * 12, loanAmt);
         const rentInitSum = (p * d) + ic;
-        document.getElementById('res-init').innerText = rentInitSum.toLocaleString();
+        document.getElementById('res-init').innerText = Math.round(rentInitSum).toLocaleString();
 
         let buyData = [];
         let rentData = [];
@@ -229,6 +291,7 @@
         document.getElementById('res-rent').innerText = Math.round(investBalance).toLocaleString() + " 萬";
         document.getElementById('res-mPay').innerText = Math.round(mPay * 10000).toLocaleString();
 
+        // 繪製圖表
         const ctx = document.getElementById('mainChart').getContext('2d');
         if (myChart) myChart.destroy();
         myChart = new Chart(ctx, {
@@ -237,20 +300,26 @@
                 labels: labels,
                 datasets: [
                     { 
-                        label: '購屋組', data: buyData, borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.4)', 
-                        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+                        label: '購屋資產 (房產)', data: buyData, borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.3)', 
+                        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5
                     },
                     { 
-                        label: '租屋組', data: rentData, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.3)', 
-                        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+                        label: '租屋資產 (股市)', data: rentData, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.2)', 
+                        fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } },
-                scales: { y: { ticks: { callback: v => v + '萬' } } }
+                plugins: { 
+                    legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: { 
+                    y: { ticks: { callback: v => v + '萬', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+                }
             }
         });
     }
