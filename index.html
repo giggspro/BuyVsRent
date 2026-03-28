@@ -46,7 +46,7 @@
     <div class="grid-main">
         <div>
             <div class="card card-blue" style="margin-bottom: 15px;">
-                <div style="font-size: 12px; font-weight: bold; color: #9CA3AF; letter-spacing: 1px;"><span class="dynamic-year">--</span>年後 購屋組資產</div>
+                <div style="font-size: 12px; font-weight: bold; color: #9CA3AF; letter-spacing: 1px;"><span class="dynamic-year">--</span>年後 購屋組淨資產</div>
                 <div class="big-number" id="res-buy">-- 萬</div>
                 <div style="font-size: 14px; color: #9CA3AF;">月繳房貸: <span id="res-mPay" style="color: #FFF;">--</span> 元</div>
             </div>
@@ -129,9 +129,10 @@
         const ic = parseFloat(document.getElementById('initCost').value);
         const d = parseFloat(document.getElementById('down').value) / 100;
         const ly = parseInt(document.getElementById('lYear').value);
-        const lr = parseFloat(document.getElementById('lRate').value) / 100 / 12;
+        const lr_annual = parseFloat(document.getElementById('lRate').value) / 100;
+        const lr_monthly = lr_annual / 12;
         const ha = parseFloat(document.getElementById('hApp').value) / 100;
-        const ir = parseFloat(document.getElementById('iRet').value) / 100 / 12;
+        const ir_annual = parseFloat(document.getElementById('iRet').value) / 100;
         const r = parseFloat(document.getElementById('rent').value) * 10000;
         const ri = parseFloat(document.getElementById('rInf').value) / 100;
 
@@ -139,15 +140,15 @@
         document.getElementById('v-initCost').innerText = ic;
         document.getElementById('v-down').innerText = d * 100;
         document.getElementById('v-lYear').innerText = ly;
-        document.getElementById('v-lRate').innerText = (lr * 12 * 100).toFixed(2);
+        document.getElementById('v-lRate').innerText = (lr_annual * 100).toFixed(2);
         document.getElementById('v-hApp').innerText = (ha * 100).toFixed(1);
-        document.getElementById('v-iRet').innerText = (ir * 12 * 100).toFixed(1);
+        document.getElementById('v-iRet').innerText = (ir_annual * 100).toFixed(1);
         document.getElementById('v-rent').innerText = (r / 10000).toFixed(1);
         document.getElementById('v-rInf').innerText = (ri * 100).toFixed(1);
         document.querySelectorAll('.dynamic-year').forEach(el => el.innerText = ly);
 
         const loanAmt = p * (1 - d);
-        const mPay = pmvt(lr, ly * 12, loanAmt);
+        const mPay = pmvt(lr_monthly, ly * 12, loanAmt);
         const rentInitSum = (p * d) + ic;
         document.getElementById('res-init').innerText = Math.round(rentInitSum).toLocaleString();
 
@@ -157,15 +158,27 @@
         let investBalance = rentInitSum; 
         let curRent = r;
 
-        // 圖表計算區間動態隨 ly (貸款年限) 變動
         for (let year = 0; year <= ly; year++) {
-            buyData.push(Math.round(p * Math.pow(1 + ha, year)));
+            // --- 購屋組：計算淨資產 (市值 - 剩餘貸款) ---
+            let currentHouseValue = p * Math.pow(1 + ha, year);
+            let remainingLoan = 0;
+            
+            if (year < ly) {
+                let n = ly * 12; // 總期數
+                let k = year * 12; // 已繳期數
+                // 剩餘本金公式: 本金 * [(1+r)^n - (1+r)^k] / [(1+r)^n - 1]
+                remainingLoan = loanAmt * (Math.pow(1 + lr_monthly, n) - Math.pow(1 + lr_monthly, k)) / (Math.pow(1 + lr_monthly, n) - 1);
+            }
+            buyData.push(Math.round(currentHouseValue - remainingLoan));
             labels.push("Y" + year);
+
+            // --- 租屋組：改為年複合增長邏輯 ---
             if (year > 0) {
-                for (let m = 1; m <= 12; m++) {
-                    let delta = ((mPay * 10000) - curRent) / 10000;
-                    investBalance = (investBalance + delta) * (1 + ir);
-                }
+                // 年度可存金額 = (月房貸 - 當年租金) * 12個月
+                let annualSavings = ((mPay * 10000) - curRent) * 12 / 10000;
+                // 每年年底結算投入並計算年複利
+                investBalance = (investBalance + annualSavings) * (1 + ir_annual);
+                // 租金年度增長
                 curRent *= (1 + ri);
             }
             rentData.push(Math.round(investBalance));
@@ -183,11 +196,11 @@
                 labels: labels,
                 datasets: [
                     { 
-                        label: '購屋組', data: buyData, borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.3)', 
+                        label: '購屋組 (淨資產)', data: buyData, borderColor: '#3B82F6', backgroundColor: 'rgba(59, 130, 246, 0.3)', 
                         fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5
                     },
                     { 
-                        label: '租屋組', data: rentData, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.2)', 
+                        label: '租屋組 (資產)', data: rentData, borderColor: '#10B981', backgroundColor: 'rgba(16, 185, 129, 0.2)', 
                         fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2.5
                     }
                 ]
